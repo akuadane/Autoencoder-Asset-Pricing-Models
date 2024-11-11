@@ -102,9 +102,9 @@ class CA_base(nn.Module, modelBase):
             loss = self.criterion(output, labels)
             
             # Apply L1 regularization
-            lambda_reg = 0.01
-            l1_norm = sum(p.abs().sum() for p in self.parameters())
-            loss += lambda_reg * l1_norm
+            # lambda_reg = 0.01
+            # l1_norm = sum(p.abs().sum() for p in self.parameters())
+            # loss += lambda_reg * l1_norm
 
             loss.backward()
             self.optimizer.step()
