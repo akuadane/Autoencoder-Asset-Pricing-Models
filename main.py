@@ -20,7 +20,9 @@ import os
 import warnings
 warnings.filterwarnings('ignore')
 
-
+DEVICE = 'cuda'
+if not torch.cuda.is_available():
+    DEVICE = 'mps'
 
 def model_inference_and_predict(model):
     """
@@ -59,7 +61,8 @@ def model_inference_and_predict_CA(model):
     Inference and Prediction of NN models:
     Returns: model.name_inference.csv & model.name_inference.csv saved in path 'results'
     """
-    model = model.to('cuda')
+
+    model = model.to(DEVICE)
     mon_list = pd.read_pickle('data/mon_list.pkl')
     test_mons = mon_list.loc[(mon_list >= model.test_period[0])]
     
@@ -161,28 +164,28 @@ def model_selection(model_type, model_K, omit_char=[]):
         return {
             'name': f'CA0_{model_K}',
             'omit_char': omit_char,
-            'model': CA0(hidden_size=model_K, lr=CA_LR, omit_char=omit_char)
+            'model': CA0(hidden_size=model_K, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         } 
             
     elif model_type == 'CA1':
         return {
             'name': f'CA1_{model_K}',
             'omit_char': omit_char,
-            'model': CA1(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char)
+            'model': CA1(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         } 
     
     elif model_type == 'CA2':
         return {
             'name': f'CA2_{model_K}',
             'omit_char': omit_char,
-            'model': CA2(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char)
+            'model': CA2(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         } 
         
     else:
         return {
             'name': f'CA3_{model_K}',
             'omit_char': omit_char,
-            'model': CA3(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char)
+            'model': CA3(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         } 
         
  

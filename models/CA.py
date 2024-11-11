@@ -166,11 +166,11 @@ class CA_base(nn.Module, modelBase):
             else:
                 no_update_steps += 1
             
-            if no_update_steps > 20: # early stop, if consecutive 3 epoches no improvement on validation set
+            if no_update_steps > 10: # early stop, if consecutive 3 epoches no improvement on validation set
                 print(f'Early stop at epoch {i}')
                 break
             # load from (best) saved model
-            self.load_state_dict(torch.load(f'./saved_models/{self.name}.pt'))
+            #self.load_state_dict(torch.load(f'./saved_models/{self.name}.pt'))
         return train_loss, valid_loss
     
     
