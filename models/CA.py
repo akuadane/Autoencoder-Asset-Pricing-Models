@@ -101,6 +101,11 @@ class CA_base(nn.Module, modelBase):
             output = self.forward(beta_nn_input, factor_nn_input)
             loss = self.criterion(output, labels)
             
+            # Apply L1 regularization
+            lambda_reg = 0.01
+            l1_norm = sum(p.abs().sum() for p in self.parameters())
+            loss += lambda_reg * l1_norm
+
             loss.backward()
             self.optimizer.step()
             epoch_loss += loss.item()
@@ -161,7 +166,7 @@ class CA_base(nn.Module, modelBase):
             else:
                 no_update_steps += 1
             
-            if no_update_steps > 2: # early stop, if consecutive 3 epoches no improvement on validation set
+            if no_update_steps > 20: # early stop, if consecutive 3 epoches no improvement on validation set
                 print(f'Early stop at epoch {i}')
                 break
             # load from (best) saved model
