@@ -170,7 +170,7 @@ class CA_base(nn.Module, modelBase):
                 print(f'Early stop at epoch {i}')
                 break
             # load from (best) saved model
-            #self.load_state_dict(torch.load(f'./saved_models/{self.name}.pt'))
+        self.load_state_dict(torch.load(f'./saved_models/{self.name}.pt'))
         return train_loss, valid_loss
     
     
