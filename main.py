@@ -2,7 +2,7 @@ import torch
 from models.PCA import PCA
 from models.FF import FF
 from models.IPCA import IPCA
-from models.CA import CA0, CA1, CA2, CA3
+from models.CA import CA0, CA1, CA2, CA3, CA3_2
 
 import gc
 import argparse
@@ -137,7 +137,7 @@ def git_push(msg):
 
 
 def model_selection(model_type, model_K, omit_char=[]):
-    assert model_type in ['FF', 'PCA', 'IPCA', 'CA0', 'CA1', 'CA2', 'CA3'], f'No Such Model: {model_type}'
+    assert model_type in ['FF', 'PCA', 'IPCA', 'CA0', 'CA1', 'CA2', 'CA3','CA3_2'], f'No Such Model: {model_type}'
     
     if model_type == 'FF':
         return {
@@ -181,18 +181,24 @@ def model_selection(model_type, model_K, omit_char=[]):
             'model': CA2(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         } 
         
-    else:
+    elif model_type=='CA3':
         return {
             'name': f'CA3_{model_K}',
             'omit_char': omit_char,
             'model': CA3(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
-        } 
+        }
+    else:
+        return {
+            'name': f'CA3_2{model_K}',
+            'omit_char': omit_char,
+            'model': CA3_2(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
+        }
         
  
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--Model', type=str, default='FF PCA IPCA CA0 CA1 CA2 CA3')
+    parser.add_argument('--Model', type=str, default='FF PCA IPCA CA0 CA1 CA2 CA3 CA3_2')
     parser.add_argument('--K', type=str, default='1 2 3 4 5 6')
     parser.add_argument('--omit_char', type=str, default='')
 
