@@ -102,9 +102,9 @@ class CA_base(nn.Module, modelBase):
             loss = self.criterion(output, labels)
             
             # Apply L1 regularization
-            lambda_reg = 0.01
+            # lambda_reg = 0.01
             l1_norm = sum(p.abs().sum() for p in self.parameters())
-            loss += lambda_reg * l1_norm
+            loss += self.lambda_reg * l1_norm
 
             loss.backward()
             self.optimizer.step()
@@ -352,9 +352,10 @@ class CA2(CA_base):
 
 
 class CA3(CA_base):
-    def __init__(self, hidden_size, dropout=0.5, lr=0.001, omit_char=[], device='cuda'):
+    def __init__(self, hidden_size, lambda_reg = 0.01, dropout=0.5, weight_decay = 0.01, lr=0.001, omit_char=[], device='cuda'):
         CA_base.__init__(self, name=f'CA3_{hidden_size}', omit_char=omit_char, device=device)
-        self.dropout = 0.3
+        self.dropout = dropout
+        self.lambda_reg = lambda_reg
         # P -> 32 -> 16 -> 8 -> K
         self.beta_nn = nn.Sequential(
             # hidden layer 1
@@ -379,5 +380,5 @@ class CA3(CA_base):
             nn.Linear(94, hidden_size)
         )
         
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.01)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=weight_decay)
         self.criterion = nn.MSELoss().to(device)

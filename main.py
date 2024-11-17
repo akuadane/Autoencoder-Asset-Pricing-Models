@@ -136,7 +136,7 @@ def git_push(msg):
 
 
 
-def model_selection(model_type, model_K, omit_char=[]):
+def model_selection(model_type, model_K, dr,lg,wd, omit_char=[]):
     assert model_type in ['FF', 'PCA', 'IPCA', 'CA0', 'CA1', 'CA2', 'CA3'], f'No Such Model: {model_type}'
     
     if model_type == 'FF':
@@ -185,7 +185,7 @@ def model_selection(model_type, model_K, omit_char=[]):
         return {
             'name': f'CA3_{model_K}',
             'omit_char': omit_char,
-            'model': CA3(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
+            'model': CA3(hidden_size=model_K, dropout=dr, lambda_reg=lg,weight_decay = wd, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         } 
         
  
@@ -217,35 +217,43 @@ if __name__ == "__main__":
             omit_chars = args.omit_char.split(' ')
         else:
             omit_chars = []
-            
-        model = model_selection(g[0], int(g[1]), omit_chars)
-            
-        print(f"{time.strftime('%a, %d %b %Y %H:%M:%S +0800', time.gmtime())} | Model: {model['name']} | {omit_chars}")
-        print('name : ', model['name'])
-        models_name.append(model['name'])
-
-        if model['name'].split('_')[0][:-1] == 'CA':
-            print('model_inference_and_predict_CA')
-            # if have omit char, inf_ret (T, N, m)
-            inf_ret = model_inference_and_predict_CA(model['model'])  
-        else:
-            inf_ret = model_inference_and_predict(model['model'])
         
-        gc.collect()    
-        
-        # Save total R^2   
-        if not len(model['omit_char']):
-            R_square.append(calculate_R2(model['model'], 'inference'))
-            alpha_plot(model['model'], 'inference', save_dir='imgs')
-            # alpha_plot(model['model'], 'predict', save_dir='alpha_imgs')
-        else:
-            inf_ret = np.array(inf_ret)
-            for i in range(len(model['omit_char'])):
-                inference_r = inf_ret[:, :, i] # T * N
-                complete_r = inf_ret[:, :, -1]
-                R_square.append(calculate_R2(None, None, inference_r, complete_r))
+        dropouts = [0.2,0.3,0.4,0.5]
+        weight_decays = [0.01,0.02,0.001]
+        lambdas = [0.0001,0.01,0.02,0.03]
 
-        del model
+        for dr,wd,lg in product(dropouts,weight_decays,lambdas):
+            
+            parameters = f"Dropout={dr}, WeightDecay={wd}, L1={lg}"
+            model = model_selection(g[0], int(g[1]),dr = dr,wd=wd,lg=lg, omit_char=omit_chars)
+                
+            print(f"{time.strftime('%a, %d %b %Y %H:%M:%S +0800', time.gmtime())} | Model: {model['name']} | {omit_chars}")
+            name = model['name'] + " " + parameters
+            print('name : ', name)
+            models_name.append(name)
+
+            if model['name'].split('_')[0][:-1] == 'CA':
+                print('model_inference_and_predict_CA')
+                # if have omit char, inf_ret (T, N, m)
+                inf_ret = model_inference_and_predict_CA(model['model'])  
+            else:
+                inf_ret = model_inference_and_predict(model['model'])
+            
+            gc.collect()    
+            
+            # Save total R^2   
+            if not len(model['omit_char']):
+                R_square.append(calculate_R2(model['model'], 'inference'))
+                alpha_plot(model['model'], 'inference', save_dir='imgs')
+                # alpha_plot(model['model'], 'predict', save_dir='alpha_imgs')
+            else:
+                inf_ret = np.array(inf_ret)
+                for i in range(len(model['omit_char'])):
+                    inference_r = inf_ret[:, :, i] # T * N
+                    complete_r = inf_ret[:, :, -1]
+                    R_square.append(calculate_R2(None, None, inference_r, complete_r))
+
+            del model
 
     # save R_square to json
     p = time.localtime()
