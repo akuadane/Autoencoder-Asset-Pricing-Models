@@ -226,7 +226,13 @@ if __name__ == "__main__":
             
             parameters = f"Dropout={dr}, WeightDecay={wd}, L1={lg}"
             model = model_selection(g[0], int(g[1]),dr = dr,wd=wd,lg=lg, omit_char=omit_chars)
-                
+            name = model['name'] + " " + parameters
+            
+
+            if name+'.json' in os.listdir('./R_squares'):
+                continue
+
+
             print(f"{time.strftime('%a, %d %b %Y %H:%M:%S +0800', time.gmtime())} | Model: {model['name']} | {omit_chars}")
             name = model['name'] + " " + parameters
             print('name : ', name)
@@ -258,7 +264,7 @@ if __name__ == "__main__":
                 'omit_char': args.omit_char.split(' '),
                 "R2_total": R_square[-1],
             }
-
+            filename = f"R_squares/{name}.json"
             with open(filename, "w") as out_file:
                 json.dump(obj, out_file)
             del model
