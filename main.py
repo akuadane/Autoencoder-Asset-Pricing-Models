@@ -252,7 +252,15 @@ if __name__ == "__main__":
                     inference_r = inf_ret[:, :, i] # T * N
                     complete_r = inf_ret[:, :, -1]
                     R_square.append(calculate_R2(None, None, inference_r, complete_r))
+            filename = f"R_squares/{name}.json"
+            obj = {
+                "models": name,
+                'omit_char': args.omit_char.split(' '),
+                "R2_total": R_square[-1],
+            }
 
+            with open(filename, "w") as out_file:
+                json.dump(obj, out_file)
             del model
 
     # save R_square to json
