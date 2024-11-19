@@ -1,0 +1,1 @@
+{"models": "CA3_3 Dropout=0.3, WeightDecay=0.01, L1=0.0001", "omit_char": [""], "R2_total": 0.7362043067256868}
