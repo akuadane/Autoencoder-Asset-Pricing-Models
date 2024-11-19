@@ -218,9 +218,9 @@ if __name__ == "__main__":
         else:
             omit_chars = []
         
-        dropouts = [0.2,0.3,0.4,0.5]
+        dropouts = [0.3,0.4,0.5]
         weight_decays = [0.01,0.02,0.001]
-        lambdas = [0.0001,0.01,0.02,0.03]
+        lambdas = [0.01,0.02,0.03]
 
         for dr,wd,lg in product(dropouts,weight_decays,lambdas):
             
