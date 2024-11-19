@@ -35,7 +35,7 @@ CHARAS_LIST = ['absacc','acc','age','agr','bm','bm_ia','cashdebt','cashpr','cfp'
 
 
 # default learning rate of CA model
-CA_DR = 0.5 # drop out rate
+CA_DR = 0.2 # drop out rate
 CA_LR = 0.001 # learning rate
 
 # out of sample period

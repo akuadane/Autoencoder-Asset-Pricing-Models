@@ -84,6 +84,7 @@ class CA_base(nn.Module, modelBase):
     def forward(self, char, pfret):
         processed_char  = self.beta_nn(char)
         processed_pfret = self.factor_nn(pfret)
+        # TODO implement a linear regression here to get traditional betas for the outputs of the factor branch
         return torch.sum(processed_char * processed_pfret, dim=1)
 
     
@@ -301,7 +302,7 @@ class CA0(CA_base):
 
 
 class CA1(CA_base):
-    def __init__(self, hidden_size, dropout=0.5, lr=0.001, omit_char=[], device='cuda'):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
         CA_base.__init__(self, name=f'CA1_{hidden_size}', omit_char=omit_char, device=device)
         self.dropout = dropout
         # P -> 32 -> K
@@ -324,7 +325,7 @@ class CA1(CA_base):
         
         
 class CA2(CA_base):
-    def __init__(self, hidden_size, dropout=0.5, lr=0.001, omit_char=[], device='cuda'):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
         CA_base.__init__(self, name=f'CA2_{hidden_size}', omit_char=omit_char, device=device)
         self.dropout = dropout
         # P -> 32 -> 16 -> K
@@ -352,7 +353,7 @@ class CA2(CA_base):
 
 
 class CA3(CA_base):
-    def __init__(self, hidden_size, dropout=0.5, lr=0.001, omit_char=[], device='cuda'):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
         CA_base.__init__(self, name=f'CA3_{hidden_size}', omit_char=omit_char, device=device)
         self.dropout = 0.3
         # P -> 32 -> 16 -> 8 -> K
@@ -379,13 +380,14 @@ class CA3(CA_base):
             nn.Linear(94, hidden_size)
         )
         
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.01)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
         self.criterion = nn.MSELoss().to(device)
 
-class CA3_2(CA_base):
-    def __init__(self, hidden_size, dropout=0.5, lr=0.001, omit_char=[], device='cuda'):
-        CA_base.__init__(self, name=f'CA3_2{hidden_size}', omit_char=omit_char, device=device)
-        self.dropout = 0.3
+class CA3_1(CA_base):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
+        CA_base.__init__(self, name=f'CA3_1_{hidden_size}', omit_char=omit_char, device=device)
+        self.dropout = dropout
+
         # P -> 32 -> 16 -> 8 -> K
         self.beta_nn = nn.Sequential(
             # hidden layer 1
@@ -415,5 +417,46 @@ class CA3_2(CA_base):
             nn.Linear(32, hidden_size)
         )
         
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.01)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
+        self.criterion = nn.MSELoss().to(device)
+
+class CA3_2(CA_base):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
+        CA_base.__init__(self, name=f'CA3_2_{hidden_size}', omit_char=omit_char, device=device)
+        self.dropout = dropout
+        # P -> 32 -> 16 -> 8 -> K
+        self.beta_nn = nn.Sequential(
+            # hidden layer 1
+            nn.Linear(94, 32),
+            nn.BatchNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 2
+            nn.Linear(32, 16),
+            nn.BatchNorm1d(16),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 3
+            nn.Linear(16, 8),
+            nn.BatchNorm1d(8),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # output layer
+            nn.Linear(8, hidden_size)
+        )
+        self.factor_nn = nn.Sequential(
+            nn.Linear(94,32),
+            nn.LayerNorm(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+
+            nn.Linear(94,16),
+            nn.LayerNorm(16),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+
+            nn.Linear(16, hidden_size)
+        )
+        
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
         self.criterion = nn.MSELoss().to(device)
