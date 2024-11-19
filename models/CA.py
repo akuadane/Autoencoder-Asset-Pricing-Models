@@ -410,7 +410,7 @@ class CA3_1(CA_base):
         )
         self.factor_nn = nn.Sequential(
             nn.Linear(94,32),
-            nn.LayerNorm(32),
+            nn.InstanceNorm1d(32),
             nn.ReLU(),
             nn.Dropout(self.dropout),
 
@@ -446,12 +446,12 @@ class CA3_2(CA_base):
         )
         self.factor_nn = nn.Sequential(
             nn.Linear(94,32),
-            nn.LayerNorm(32),
+            nn.InstanceNorm1d(32),
             nn.ReLU(),
             nn.Dropout(self.dropout),
 
-            nn.Linear(94,16),
-            nn.LayerNorm(16),
+            nn.Linear(32,16),
+            nn.InstanceNorm1d(16),
             nn.ReLU(),
             nn.Dropout(self.dropout),
 
