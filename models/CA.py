@@ -157,7 +157,9 @@ class CA_base(nn.Module, modelBase):
             # valid and early stop
             with torch.no_grad():
                 valid_error = self.__valid_one_epoch()
-                
+            # Print train and valid loss
+            print(train_error,valid_error)   
+
             valid_loss.append(valid_error)
             if valid_error < min_error:
                 min_error = valid_error
