@@ -100,7 +100,11 @@ class CA_base(nn.Module, modelBase):
             factor_nn_input = factor_nn_input.squeeze(0).T
             labels = labels.squeeze(0)
             output = self.forward(beta_nn_input, factor_nn_input)
-            loss = self.criterion(output, labels)
+            if type(output)==tuple:
+                loss = self.criterion(output[0], labels)
+                loss+= self.criterion(output[1], labels)
+            else:
+                loss = self.criterion(output, labels)
             
             # Apply L1 regularization
             lambda_reg = 0.01
@@ -129,7 +133,12 @@ class CA_base(nn.Module, modelBase):
             labels = labels.squeeze(0)
 
             output = self.forward(beta_nn_input, factor_nn_input)
-            loss = self.criterion(output, labels)
+            if type(output)==tuple:
+                loss = self.criterion(output[0], labels)
+                loss+= self.criterion(output[1], labels)
+            else:
+                loss = self.criterion(output, labels)
+            # loss = self.criterion(output, labels)
             epoch_loss += loss.item()
 
         return epoch_loss / len(self.valid_dataloader)
@@ -158,7 +167,8 @@ class CA_base(nn.Module, modelBase):
             with torch.no_grad():
                 valid_error = self.__valid_one_epoch()
             # Print train and valid loss
-            print(train_error,valid_error)   
+            print(f"Train loss: {train_error}, Valid loss: {valid_error} ")
+   
 
             valid_loss.append(valid_error)
             if valid_error < min_error:
@@ -169,7 +179,7 @@ class CA_base(nn.Module, modelBase):
             else:
                 no_update_steps += 1
             
-            if no_update_steps > 20: # early stop, if consecutive 3 epoches no improvement on validation set
+            if no_update_steps > 10: # early stop, if consecutive 3 epoches no improvement on validation set
                 print(f'Early stop at epoch {i}')
                 break
             # load from (best) saved model
@@ -192,8 +202,12 @@ class CA_base(nn.Module, modelBase):
             # labels = torch.tensor(labels, dtype=torch.float32).T.to(self.device)
             output = self.forward(beta_nn_input, factor_nn_input)
             break
-
-        loss = self.criterion(output, labels)
+        if type(output)==tuple:
+            loss = self.criterion(output[0], labels)
+            loss+= self.criterion(output[1], labels)
+        else:
+            loss = self.criterion(output, labels)
+        # loss = self.criterion(output, labels)
         print(f'Test loss: {loss.item()}')
         print(f'Predicted: {output}')
         print(f'Ground truth: {labels}')
@@ -462,3 +476,54 @@ class CA3_2(CA_base):
         
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
         self.criterion = nn.MSELoss().to(device)
+
+class CA3_1_Full(CA_base):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
+        CA_base.__init__(self, name=f'CA3_1_Full{hidden_size}', omit_char=omit_char, device=device)
+        self.dropout = dropout
+
+        # P -> 32 -> 16 -> 8 -> K
+        self.beta_nn = nn.Sequential(
+            # hidden layer 1
+            nn.Linear(94, 32),
+            nn.BatchNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 2
+            nn.Linear(32, 16),
+            nn.BatchNorm1d(16),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 3
+            nn.Linear(16, 8),
+            nn.BatchNorm1d(8),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # output layer
+            nn.Linear(8, hidden_size)
+        )
+        self.factor_nn = nn.Sequential(
+            nn.Linear(94,32),
+            nn.InstanceNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+
+            nn.Linear(32, hidden_size)
+        )
+
+        self.factor_decoder = nn.Sequential(
+            nn.Linear(hidden_size,32),
+            nn.InstanceNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            nn.Linear(32, 94)
+        )
+        
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
+        self.criterion = nn.MSELoss().to(device)
+
+    def forward(self, char, pfret):
+        processed_char  = self.beta_nn(char)
+        processed_pfret = self.factor_nn(pfret)
+        decoded_pfret = self.factor_decoder(processed_pfret)
+        return torch.sum(processed_char * processed_pfret, dim=1),decoded_pfret
