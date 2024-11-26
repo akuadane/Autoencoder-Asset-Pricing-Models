@@ -167,13 +167,13 @@ class CA_base(nn.Module, modelBase):
             with torch.no_grad():
                 valid_error = self.__valid_one_epoch()
             # Print train and valid loss
-            print(f"Train loss: {train_error}, Valid loss: {valid_error} ")
    
 
             valid_loss.append(valid_error)
             if valid_error < min_error:
                 min_error = valid_error
                 no_update_steps = 0
+                print(f"Train loss: {train_error}, Valid loss: {valid_error} ")
                 # save model
                 torch.save(self.state_dict(), f'./saved_models/{self.name}.pt')
             else:
