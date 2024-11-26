@@ -527,3 +527,64 @@ class CA3_1_Full(CA_base):
         processed_pfret = self.factor_nn(pfret)
         decoded_pfret = self.factor_decoder(processed_pfret)
         return torch.sum(processed_char * processed_pfret, dim=1),decoded_pfret
+
+class CA3_2_Full(CA_base):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
+        CA_base.__init__(self, name=f'CA3_2_Full{hidden_size}', omit_char=omit_char, device=device)
+        self.dropout = dropout
+        # P -> 32 -> 16 -> 8 -> K
+        self.beta_nn = nn.Sequential(
+            # hidden layer 1
+            nn.Linear(94, 32),
+            nn.BatchNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 2
+            nn.Linear(32, 16),
+            nn.BatchNorm1d(16),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 3
+            nn.Linear(16, 8),
+            nn.BatchNorm1d(8),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # output layer
+            nn.Linear(8, hidden_size)
+        )
+        self.factor_nn = nn.Sequential(
+            nn.Linear(94,32),
+            nn.InstanceNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+
+            nn.Linear(32,16),
+            nn.InstanceNorm1d(16),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+
+            nn.Linear(16, hidden_size)
+        )
+
+        self.factor_decoder = nn.Sequential(
+            nn.Linear(hidden_size,16),
+            nn.InstanceNorm1d(16),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+
+            nn.Linear(16,32),
+            nn.InstanceNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+
+            nn.Linear(32, 94)
+        )
+        
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
+        self.criterion = nn.MSELoss().to(device)
+
+    def forward(self, char, pfret):
+        processed_char  = self.beta_nn(char)
+        processed_pfret = self.factor_nn(pfret)
+        decoded_pfret = self.factor_decoder(processed_pfret)
+        return torch.sum(processed_char * processed_pfret, dim=1),decoded_pfret
