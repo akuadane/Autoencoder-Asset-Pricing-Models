@@ -23,6 +23,7 @@ warnings.filterwarnings('ignore')
 DEVICE = 'cuda'
 if not torch.cuda.is_available():
     DEVICE = 'mps'
+print(DEVICE)
 
 def model_inference_and_predict(model):
     """
