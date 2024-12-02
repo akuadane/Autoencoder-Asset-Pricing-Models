@@ -124,6 +124,7 @@ class CA_base(nn.Module, modelBase):
 
     def __valid_one_epoch(self):
         epoch_loss = 0.0
+        beta_loss = 0.0
         for i, (beta_nn_input, factor_nn_input, labels) in enumerate(self.valid_dataloader):
             # beta_nn_input reshape: (1, 94, 94) -> (94, 94) (1*P*N => N*P)
             # factor_nn_input reshape: (1, 94, 1) -> (1, 94) (1*P*1 => 1*P)
@@ -135,14 +136,15 @@ class CA_base(nn.Module, modelBase):
             output = self.forward(beta_nn_input, factor_nn_input)
             if type(output)==tuple:
                 loss = self.criterion(output[0], labels)
-                print("Beta loss afer autoencoder change: ",loss)
+                beta_loss+=loss.item()
                 loss+= self.criterion(output[1], labels)
             else:
                 loss = self.criterion(output, labels)
+                beta_loss+=loss.item()
                 print("Beta loss before autoencoder change: ",loss)
             # loss = self.criterion(output, labels)
             epoch_loss += loss.item()
-
+        print("Beta loss: ",beta_loss/len(self.valid_dataloader))
         return epoch_loss / len(self.valid_dataloader)
     
     
