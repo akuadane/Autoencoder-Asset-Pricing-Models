@@ -583,3 +583,39 @@ class CA3_2_Full(CA_base):
         processed_pfret = self.factor_nn(pfret)
         decoded_pfret = self.factor_decoder(processed_pfret)
         return torch.sum(processed_char * processed_pfret, dim=1),decoded_pfret
+
+
+class Auto_1(CA_base):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
+        CA_base.__init__(self, name=f'Auto_1_{hidden_size}', omit_char=omit_char, device=device)
+        self.dropout = dropout
+
+        # P -> 32 -> 16 -> 8 -> K
+        self.beta_nn = nn.Sequential(
+            # output layer
+            nn.Linear(94, hidden_size)
+        )
+        self.factor_nn = nn.Sequential(
+            nn.Linear(94,32),
+            nn.InstanceNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+
+            nn.Linear(32, hidden_size)
+        )
+
+        self.factor_decoder = nn.Sequential(
+            nn.Linear(hidden_size,32),
+            nn.InstanceNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            nn.Linear(32, 94)
+        )
+        
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
+        self.criterion = nn.MSELoss().to(device)
+
+    def forward(self, char, pfret):
+        processed_pfret = self.factor_nn(pfret)
+        decoded_pfret = self.factor_decoder(processed_pfret)
+        return decoded_pfret
