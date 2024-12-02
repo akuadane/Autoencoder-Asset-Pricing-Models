@@ -206,6 +206,12 @@ def model_selection(model_type, model_K, omit_char=[]):
             'omit_char': omit_char,
             'model': CA3_1_Full(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         }
+    elif model_type=='CA3_2_Full':
+        return {
+            'name': f'CA3_2_Full_{model_K}',
+            'omit_char': omit_char,
+            'model': CA3_2_Full(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
+        }
     elif model_type=='Auto_1':
         return {
             'name': f'Auto_1_{model_K}',
