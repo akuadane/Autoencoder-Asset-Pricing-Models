@@ -616,6 +616,7 @@ class Auto_1(CA_base):
         self.criterion = nn.MSELoss().to(device)
 
     def forward(self, char, pfret):
+        pfret = pfret.to(self.device)
         processed_pfret = self.factor_nn(pfret)
         decoded_pfret = self.factor_decoder(processed_pfret)
         return decoded_pfret
