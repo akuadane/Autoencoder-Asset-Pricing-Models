@@ -523,7 +523,7 @@ class CA3_1_Full(CA_base):
 
 class Auto_1(CA_base):
     def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
-        CA_base.__init__(self, name=f'Auto_1{hidden_size}', omit_char=omit_char, device=device)
+        CA_base.__init__(self, name=f'Auto_1_{hidden_size}', omit_char=omit_char, device=device)
         self.dropout = dropout
         self.beta_nn = nn.Sequential(
             # hidden layer 1
@@ -534,7 +534,7 @@ class Auto_1(CA_base):
             # output layer
             nn.Linear(32, hidden_size)
         )
-        
+
         self.factor_nn = nn.Sequential(
             nn.Linear(94,32),
             nn.InstanceNorm1d(32),
@@ -567,7 +567,7 @@ class Auto_1(CA_base):
         self.criterion = nn.MSELoss().to(device)
 
     def forward(self, char, pfret):
-        
+        processed_char  = self.beta_nn(char)
         processed_pfret = self.factor_nn(pfret)
         decoded_pfret = self.factor_decoder(processed_pfret)
         return decoded_pfret

@@ -189,7 +189,7 @@ def model_selection(model_type, model_K, omit_char=[]):
         }
     elif model_type=='Auto_1':
         return {
-            'name': f'Auto_1{model_K}',
+            'name': f'Auto_1_{model_K}',
             'omit_char': omit_char,
             'model': Auto_1(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         }
