@@ -136,15 +136,14 @@ class CA_base(nn.Module, modelBase):
             output = self.forward(beta_nn_input, factor_nn_input)
             if type(output)==tuple:
                 loss = self.criterion(output[0], labels)
-                beta_loss+=loss.item()
-                loss+= self.criterion(output[1], labels)
+                # for evaluation we only need to check the beta loss, this serves a good comparision.
             else:
                 loss = self.criterion(output, labels)
                 beta_loss+=loss.item()
-                print("Beta loss before autoencoder change: ",loss)
+                
             # loss = self.criterion(output, labels)
             epoch_loss += loss.item()
-        print("Beta loss: ",beta_loss/len(self.valid_dataloader))
+        
         return epoch_loss / len(self.valid_dataloader)
     
     
@@ -177,7 +176,7 @@ class CA_base(nn.Module, modelBase):
             if valid_error < min_error:
                 min_error = valid_error
                 no_update_steps = 0
-                print(f"Train loss: {train_error}, Valid loss: {valid_error} ")
+                print(f"Valid loss: {valid_error}")
                 # save model
                 torch.save(self.state_dict(), f'./saved_models/{self.name}.pt')
             else:
