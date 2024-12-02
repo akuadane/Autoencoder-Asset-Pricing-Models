@@ -135,9 +135,11 @@ class CA_base(nn.Module, modelBase):
             output = self.forward(beta_nn_input, factor_nn_input)
             if type(output)==tuple:
                 loss = self.criterion(output[0], labels)
+                print("Beta loss afer autoencoder change: ",loss)
                 loss+= self.criterion(output[1], labels)
             else:
                 loss = self.criterion(output, labels)
+                print("Beta loss before autoencoder change: ",loss)
             # loss = self.criterion(output, labels)
             epoch_loss += loss.item()
 
