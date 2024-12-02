@@ -100,12 +100,10 @@ class CA_base(nn.Module, modelBase):
             factor_nn_input = factor_nn_input.squeeze(0).T
             labels = labels.squeeze(0)
             output = self.forward(beta_nn_input, factor_nn_input)
-            if type(output)==tuple:
-                loss = self.criterion(output[0], labels)
-                loss+= self.criterion(output[1], labels)
-            else:
-                loss = self.criterion(output, labels)
             
+        
+            loss = self.criterion(output, labels)
+        
             # Apply L1 regularization
             lambda_reg = 0.01
             l1_norm = sum(p.abs().sum() for p in self.parameters())
@@ -134,12 +132,9 @@ class CA_base(nn.Module, modelBase):
             labels = labels.squeeze(0)
 
             output = self.forward(beta_nn_input, factor_nn_input)
-            if type(output)==tuple:
-                loss = self.criterion(output[0], labels)
-                # for evaluation we only need to check the beta loss, this serves a good comparision.
-            else:
-                loss = self.criterion(output, labels)
-                beta_loss+=loss.item()
+          
+            loss = self.criterion(output, labels)
+                
                 
             # loss = self.criterion(output, labels)
             epoch_loss += loss.item()
@@ -205,11 +200,8 @@ class CA_base(nn.Module, modelBase):
             # labels = torch.tensor(labels, dtype=torch.float32).T.to(self.device)
             output = self.forward(beta_nn_input, factor_nn_input)
             break
-        if type(output)==tuple:
-            loss = self.criterion(output[0], labels)
-            loss+= self.criterion(output[1], labels)
-        else:
-            loss = self.criterion(output, labels)
+     
+        loss = self.criterion(output, labels)
         # loss = self.criterion(output, labels)
         print(f'Test loss: {loss.item()}')
         print(f'Predicted: {output}')
