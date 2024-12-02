@@ -2,7 +2,7 @@ import torch
 from models.PCA import PCA
 from models.FF import FF
 from models.IPCA import IPCA
-from models.CA import CA0, CA1, CA2, CA3, CA3_1, CA3_2, CA3_1_Full, CA3_2_Full
+from models.CA import CA0, CA1, CA2, CA3, Auto_1
 
 import gc
 import argparse
@@ -137,7 +137,7 @@ def git_push(msg):
 
 
 def model_selection(model_type, model_K, omit_char=[]):
-    assert model_type in ['FF', 'PCA', 'IPCA', 'CA0', 'CA1', 'CA2', 'CA3','CA3_1','CA3_2','CA3_1_Full','CA3_2_Full'], f'No Such Model: {model_type}'
+    assert model_type in ['FF', 'PCA', 'IPCA', 'CA0', 'CA1', 'CA2', 'CA3','Auto_1'], f'No Such Model: {model_type}'
     
     if model_type == 'FF':
         return {
@@ -187,34 +187,16 @@ def model_selection(model_type, model_K, omit_char=[]):
             'omit_char': omit_char,
             'model': CA3(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         }
-    elif model_type=='CA3_1':
+    elif model_type=='Auto_1':
         return {
-            'name': f'CA3_1_{model_K}',
+            'name': f'Auto_1{model_K}',
             'omit_char': omit_char,
-            'model': CA3_1(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
-        }
-    elif model_type=='CA3_2':
-        return {
-            'name': f'CA3_2_{model_K}',
-            'omit_char': omit_char,
-            'model': CA3_2(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
-        }
-    elif model_type=='CA3_1_Full':
-        return {
-            'name': f'CA3_1_Full_{model_K}',
-            'omit_char': omit_char,
-            'model': CA3_1_Full(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
-        }
-    elif model_type=='CA3_2_Full':
-        return {
-            'name': f'CA3_2_Full_{model_K}',
-            'omit_char': omit_char,
-            'model': CA3_2_Full(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
+            'model': Auto_1(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         }
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--Model', type=str, default='FF PCA IPCA CA0 CA1 CA2 CA3 CA3_1 CA3_2 CA3_1_Full CA3_2_Full')
+    parser.add_argument('--Model', type=str, default='FF PCA IPCA CA0 CA1 CA2 CA3 Auto_1')
     parser.add_argument('--K', type=str, default='1 2 3 4 5 6')
     parser.add_argument('--omit_char', type=str, default='')
 
