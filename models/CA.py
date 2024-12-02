@@ -592,8 +592,23 @@ class Auto_1(CA_base):
 
         # P -> 32 -> 16 -> 8 -> K
         self.beta_nn = nn.Sequential(
+            # hidden layer 1
+            nn.Linear(94, 32),
+            nn.BatchNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 2
+            nn.Linear(32, 16),
+            nn.BatchNorm1d(16),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 3
+            nn.Linear(16, 8),
+            nn.BatchNorm1d(8),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
             # output layer
-            nn.Linear(94, hidden_size)
+            nn.Linear(8, hidden_size)
         )
         self.factor_nn = nn.Sequential(
             nn.Linear(94,32),
@@ -616,7 +631,7 @@ class Auto_1(CA_base):
         self.criterion = nn.MSELoss().to(device)
 
     def forward(self, char, pfret):
-        pfret = pfret.to(self.device)
+        processed_char  = self.beta_nn(char)
         processed_pfret = self.factor_nn(pfret)
         decoded_pfret = self.factor_decoder(processed_pfret)
-        return decoded_pfret
+        return torch.sum(processed_char * processed_pfret, dim=1),decoded_pfret
