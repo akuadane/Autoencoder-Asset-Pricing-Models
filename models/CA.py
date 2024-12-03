@@ -590,7 +590,44 @@ class Auto_1(CA_base):
         CA_base.__init__(self, name=f'Auto_1_{hidden_size}', omit_char=omit_char, device=device)
         self.dropout = dropout
 
-        # P -> 32 -> 16 -> 8 -> K
+        # P -> K
+        self.beta_nn = nn.Sequential(
+            # output layer
+            nn.Linear(94, hidden_size)
+        ).to(device)
+
+        self.factor_nn = nn.Sequential(
+            nn.Linear(94,32),
+            nn.InstanceNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+
+            nn.Linear(32, hidden_size)
+        ).to(device)
+
+        self.factor_decoder = nn.Sequential(
+            nn.Linear(hidden_size,32),
+            nn.InstanceNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            nn.Linear(32, 94)
+        ).to(device)
+        
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
+        self.criterion = nn.MSELoss().to(device)
+
+    def forward(self, char, pfret):
+        processed_pfret = self.factor_nn(pfret)
+        decoded_pfret = self.factor_decoder(processed_pfret)
+        return decoded_pfret
+
+
+class CAA3_1(CA_base):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
+        CA_base.__init__(self, name=f'CAA3_1_{hidden_size}', omit_char=omit_char, device=device)
+        self.dropout = dropout
+
+        # P -> K
         self.beta_nn = nn.Sequential(
             # hidden layer 1
             nn.Linear(94, 32),
@@ -609,29 +646,26 @@ class Auto_1(CA_base):
             nn.Dropout(self.dropout),
             # output layer
             nn.Linear(8, hidden_size)
-        )
-        self.factor_nn = nn.Sequential(
-            nn.Linear(94,32),
-            nn.InstanceNorm1d(32),
-            nn.ReLU(),
-            nn.Dropout(self.dropout),
+        ).to(device)
+        try: 
+            auto = Auto_1(3,device=device)
+            auto.load_state_dict(torch.load(f'./saved_models/{auto.name}.pt'))
+            self.factor_nn = auto.factor_nn
+        except:
+            raise("Couldn't locate the appropriate pretrained autoencoder")
 
-            nn.Linear(32, hidden_size)
-        )
-
-        self.factor_decoder = nn.Sequential(
-            nn.Linear(hidden_size,32),
-            nn.InstanceNorm1d(32),
-            nn.ReLU(),
-            nn.Dropout(self.dropout),
-            nn.Linear(32, 94)
-        )
-        
         self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
         self.criterion = nn.MSELoss().to(device)
 
-    def forward(self, char, pfret):
-        processed_char  = self.beta_nn(char)
-        processed_pfret = self.factor_nn(pfret)
-        decoded_pfret = self.factor_decoder(processed_pfret)
-        return torch.sum(processed_char * processed_pfret, dim=1),decoded_pfret
+    def reset_weight(self):
+        for layer in self.beta_nn: # reset beta_nn parameters
+            if hasattr(layer, 'reset_parameters'):
+                layer.reset_parameters()
+        
+        try: 
+            auto = Auto_1(3,device=self.device)
+            auto.load_state_dict(torch.load(f'./saved_models/{auto.name}.pt'))
+            self.factor_nn = auto.factor_nn
+        except:
+            raise("Couldn't locate the appropriate pretrained autoencoder")
+        self.optimizer.state = collections.defaultdict(dict) # reset optimizer state

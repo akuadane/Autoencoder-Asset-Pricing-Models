@@ -11,3 +11,4 @@ saved_models
 results/
 logs/
 R_squares/
+.venv/
