@@ -2,7 +2,7 @@ import torch
 from models.PCA import PCA
 from models.FF import FF
 from models.IPCA import IPCA
-from models.CA import CA0, CA1, CA2, CA3, CA3_1, CA3_2, CA3_A_1, CAA3_1, Auto_1, CA3_1_Full, CA3_2_Full, CA3_Auto_1
+from models.CA import CA0, CA1, CA2, CA3, CA3_1, CA3_2, CA3_A_1, CA3_1_Full, CA3_2_Full, CA3_Auto_1
 
 import gc
 import argparse
