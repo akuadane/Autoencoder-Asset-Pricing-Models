@@ -596,6 +596,9 @@ class CA3_Auto_1(CA_base):
             nn.Linear(94, hidden_size)
         ).to(device)
 
+        for param in self.beta_nn.parameters():
+                param.requires_grad = False
+
         self.factor_nn = nn.Sequential(
             nn.Linear(94,32),
             nn.InstanceNorm1d(32),
@@ -613,7 +616,7 @@ class CA3_Auto_1(CA_base):
             nn.Linear(32, 94)
         ).to(device)
         
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
+        self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.parameters()), lr=lr, weight_decay=0.001)
         self.criterion = nn.MSELoss().to(device)
 
     def forward(self, char, pfret):
