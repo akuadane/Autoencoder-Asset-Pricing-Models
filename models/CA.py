@@ -705,7 +705,7 @@ class CA3_fixed_1(CA_base):
         except:
             raise("Couldn't locate the appropriate pretrained autoencoder")
 
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
+        self.optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, self.parameters()), lr=lr, weight_decay=0.001)
         self.criterion = nn.MSELoss().to(device)
 
     def reset_weight(self):
