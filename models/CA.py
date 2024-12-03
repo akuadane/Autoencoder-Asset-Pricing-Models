@@ -585,9 +585,9 @@ class CA3_2_Full(CA_base):
         return torch.sum(processed_char * processed_pfret, dim=1),decoded_pfret
 
 
-class Auto_1(CA_base):
+class CA3_Auto_1(CA_base):
     def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
-        CA_base.__init__(self, name=f'Auto_1_{hidden_size}', omit_char=omit_char, device=device)
+        CA_base.__init__(self, name=f'CA_Auto_1_{hidden_size}', omit_char=omit_char, device=device)
         self.dropout = dropout
 
         # P -> K
@@ -622,7 +622,7 @@ class Auto_1(CA_base):
         return decoded_pfret
 
 
-class CAA3_1(CA_base):
+class CA3_A_1(CA_base):
     def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
         CA_base.__init__(self, name=f'CAA3_1_{hidden_size}', omit_char=omit_char, device=device)
         self.dropout = dropout
@@ -663,7 +663,7 @@ class CAA3_1(CA_base):
                 layer.reset_parameters()
         
         try: 
-            auto = Auto_1(3,device=self.device)
+            auto = CA_Auto_1(3,device=self.device)
             auto.load_state_dict(torch.load(f'./saved_models/{auto.name}.pt'))
             self.factor_nn = auto.factor_nn
         except:
