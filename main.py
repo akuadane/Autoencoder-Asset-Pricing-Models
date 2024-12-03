@@ -212,9 +212,9 @@ def model_selection(model_type, model_K, omit_char=[]):
             'omit_char': omit_char,
             'model': CA3_2_Full(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         }
-    elif model_type=='CA_Auto_1':
+    elif model_type=='CA3_Auto_1':
         return {
-            'name': f'CA_Auto_1_{model_K}',
+            'name': f'CA3_Auto_1_{model_K}',
             'omit_char': omit_char,
             'model': CA3_Auto_1(hidden_size=model_K, dropout=CA_DR, lr=CA_LR, omit_char=omit_char,device=DEVICE)
         }
@@ -227,7 +227,7 @@ def model_selection(model_type, model_K, omit_char=[]):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--Model', type=str, default='FF PCA IPCA CA0 CA1 CA2 CA3 CA3_1 CA3_2 CA3_1_Full CA3_2_Full CA_Auto_1 CA_A3_1')
+    parser.add_argument('--Model', type=str, default='FF PCA IPCA CA0 CA1 CA2 CA3 CA3_1 CA3_2 CA3_1_Full CA3_2_Full CA3_Auto_1 CA3_A_1')
     parser.add_argument('--K', type=str, default='1 2 3 4 5 6')
     parser.add_argument('--omit_char', type=str, default='')
 

@@ -624,7 +624,7 @@ class CA3_Auto_1(CA_base):
 
 class CA3_A_1(CA_base):
     def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
-        CA_base.__init__(self, name=f'CAA3_1_{hidden_size}', omit_char=omit_char, device=device)
+        CA_base.__init__(self, name=f'CA3_A_1{hidden_size}', omit_char=omit_char, device=device)
         self.dropout = dropout
 
         # P -> K
