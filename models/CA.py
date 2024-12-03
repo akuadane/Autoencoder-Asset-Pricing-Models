@@ -669,3 +669,48 @@ class CA3_A_1(CA_base):
         except:
             raise("Couldn't locate the appropriate pretrained autoencoder")
         self.optimizer.state = collections.defaultdict(dict) # reset optimizer state
+
+
+class CA3_fixed_1(CA_base):
+    def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
+        CA_base.__init__(self, name=f'CA3_fixed_1_{hidden_size}', omit_char=omit_char, device=device)
+        self.dropout = dropout
+
+        # P -> K
+        self.beta_nn = nn.Sequential(
+            # hidden layer 1
+            nn.Linear(94, 32),
+            nn.BatchNorm1d(32),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 2
+            nn.Linear(32, 16),
+            nn.BatchNorm1d(16),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # hidden layer 3
+            nn.Linear(16, 8),
+            nn.BatchNorm1d(8),
+            nn.ReLU(),
+            nn.Dropout(self.dropout),
+            # output layer
+            nn.Linear(8, hidden_size)
+        ).to(device)
+        try: 
+            auto = CA3_Auto_1(3,device=device)
+            auto.load_state_dict(torch.load(f'./saved_models/{auto.name}.pt'))
+            self.factor_nn = auto.factor_nn
+            for param in self.factor_nn.parameters():
+                param.requires_grad = False
+        except:
+            raise("Couldn't locate the appropriate pretrained autoencoder")
+
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=lr, weight_decay=0.001)
+        self.criterion = nn.MSELoss().to(device)
+
+    def reset_weight(self):
+        for layer in self.beta_nn: # reset beta_nn parameters
+            if hasattr(layer, 'reset_parameters'):
+                layer.reset_parameters()
+        
+        self.optimizer.state = collections.defaultdict(dict) # reset optimizer state
