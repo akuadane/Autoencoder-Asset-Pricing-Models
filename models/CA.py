@@ -648,7 +648,7 @@ class CA3_A_1(CA_base):
             nn.Linear(8, hidden_size)
         ).to(device)
         try: 
-            auto = Auto_1(3,device=device)
+            auto = CA3_Auto_1(3,device=device)
             auto.load_state_dict(torch.load(f'./saved_models/{auto.name}.pt'))
             self.factor_nn = auto.factor_nn
         except:
@@ -663,7 +663,7 @@ class CA3_A_1(CA_base):
                 layer.reset_parameters()
         
         try: 
-            auto = CA_Auto_1(3,device=self.device)
+            auto = CA3_Auto_1(3,device=self.device)
             auto.load_state_dict(torch.load(f'./saved_models/{auto.name}.pt'))
             self.factor_nn = auto.factor_nn
         except:
