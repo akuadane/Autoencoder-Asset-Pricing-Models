@@ -584,7 +584,7 @@ class CA3_2_Full(CA_base):
         decoded_pfret = self.factor_decoder(processed_pfret)
         return torch.sum(processed_char * processed_pfret, dim=1),decoded_pfret
 
-
+# Trains just the autoencoder
 class CA3_Auto_1(CA_base):
     def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
         CA_base.__init__(self, name=f'CA_Auto_1_{hidden_size}', omit_char=omit_char, device=device)
@@ -625,6 +625,7 @@ class CA3_Auto_1(CA_base):
         return decoded_pfret
 
 
+# Initializes with the autoencoder's weights and trains as usual
 class CA3_A_1(CA_base):
     def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
         CA_base.__init__(self, name=f'CA3_A_1{hidden_size}', omit_char=omit_char, device=device)
@@ -673,7 +674,7 @@ class CA3_A_1(CA_base):
             raise("Couldn't locate the appropriate pretrained autoencoder")
         self.optimizer.state = collections.defaultdict(dict) # reset optimizer state
 
-
+# Only trains the Beta branch, while the factor side is fixed 
 class CA3_fixed_1(CA_base):
     def __init__(self, hidden_size, dropout=0.2, lr=0.001, omit_char=[], device='cuda'):
         CA_base.__init__(self, name=f'CA3_fixed_1_{hidden_size}', omit_char=omit_char, device=device)
